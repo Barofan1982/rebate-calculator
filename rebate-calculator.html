@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>钻石返利计算器</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4ecf3 100%);
+    min-height: 100vh;
+    padding: 24px 16px;
+    color: #1f2937;
+  }
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    color: #0f172a;
+  }
+  .subtitle {
+    margin: 0 0 20px;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    color: #475569;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .prefix {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 16px;
+  }
+  input[type="number"] {
+    flex: 1;
+    padding: 12px 14px;
+    font-size: 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+  }
+  input[type="number"]:focus {
+    border-color: #6366f1;
+  }
+  input[type="number"].error {
+    border-color: #ef4444;
+  }
+  .examples {
+    margin-top: 14px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .examples button {
+    background: #eef2ff;
+    color: #4338ca;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .examples button:hover {
+    background: #e0e7ff;
+  }
+  .error-msg {
+    color: #ef4444;
+    font-size: 13px;
+    margin-top: 8px;
+    min-height: 18px;
+  }
+  .result-total {
+    text-align: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: #fff;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  .result-total .label {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-bottom: 6px;
+  }
+  .result-total .value {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .result-total .value .unit {
+    font-size: 18px;
+    opacity: 0.9;
+    margin-left: 6px;
+    font-weight: 500;
+  }
+  .breakdown {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .breakdown-row {
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .breakdown-row:last-child {
+    border-bottom: none;
+    background: #f8fafc;
+    font-weight: 600;
+  }
+  .row-title {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .row-title .rate {
+    color: #4338ca;
+    background: #eef2ff;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    margin-left: 8px;
+  }
+  .row-calc {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.7;
+  }
+  .row-calc .step {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+  }
+  .row-calc .arrow {
+    color: #94a3b8;
+    margin: 0 6px;
+  }
+  .row-result {
+    margin-top: 8px;
+    font-size: 16px;
+    color: #0f172a;
+  }
+  .row-result strong {
+    color: #4338ca;
+  }
+  details {
+    margin-top: 8px;
+  }
+  details summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: #4338ca;
+    padding: 8px 0;
+    font-size: 14px;
+    user-select: none;
+  }
+  details summary:hover {
+    color: #3730a3;
+  }
+  .rules {
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  .rules h3 {
+    font-size: 14px;
+    color: #0f172a;
+    margin: 12px 0 6px;
+  }
+  .rules code {
+    background: #f1f5f9;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  .formula-note {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #78350f;
+    margin-top: 12px;
+  }
+  @media (max-width: 480px) {
+    .card { padding: 20px; }
+    h1 { font-size: 20px; }
+    .result-total .value { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="card">
+    <h1>钻石返利计算器</h1>
+    <p class="subtitle">测试期间累计充值金额越高，正式上线后可领取的返利钻石越多。</p>
+
+    <label for="amount">累计充值金额</label>
+    <div class="input-row">
+      <span class="prefix">USD</span>
+      <input type="number" id="amount" placeholder="0.00" step="0.01" min="0" autofocus>
+    </div>
+
+    <div class="examples">
+      <button type="button" data-val="49.99">示例 1：$49.99</button>
+      <button type="button" data-val="129.97">示例 2：$129.97</button>
+      <button type="button" data-val="100">$100 临界</button>
+      <button type="button" data-val="0">清空</button>
+    </div>
+
+    <div class="error-msg" id="error"></div>
+  </div>
+
+  <div class="card" id="resultCard">
+    <div class="result-total">
+      <div class="label">可领取返利钻石总数</div>
+      <div class="value"><span id="totalDiamonds">0</span><span class="unit">钻石</span></div>
+    </div>
+
+    <div class="breakdown">
+      <div class="breakdown-row">
+        <div class="row-title">第 1 段：≤ $100 部分<span class="rate">返利 200%</span></div>
+        <div class="row-calc">
+          <div class="step"><span>USD 金额</span><span id="p1Usd">—</span></div>
+          <div class="step"><span>ceil(USD) × 60</span><span id="p1Diamonds">—</span></div>
+          <div class="step"><span>× 200% 倍率</span><span id="p1Rebate">—</span></div>
+        </div>
+      </div>
+      <div class="breakdown-row">
+        <div class="row-title">第 2 段：超出 $100 部分<span class="rate">返利 100%</span></div>
+        <div class="row-calc">
+          <div class="step"><span>USD 金额</span><span id="p2Usd">—</span></div>
+          <div class="step"><span>ceil(USD) × 60</span><span id="p2Diamonds">—</span></div>
+          <div class="step"><span>× 100% 倍率</span><span id="p2Rebate">—</span></div>
+        </div>
+      </div>
+      <div class="breakdown-row">
+        <div class="row-title">合计</div>
+        <div class="row-result">
+          <span id="sumText">0 + 0 = </span><strong><span id="sumTotal">0</span> 钻石</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>查看完整返利规则</summary>
+      <div class="rules">
+        <h3>计入范围</h3>
+        <p>测试期间，玩家购买【任意档位钻石】、【通行证】和【礼包】的金额将计入【累计充值总额】。</p>
+
+        <h3>返利档位</h3>
+        <p>游戏正式上线后，将根据测试期间同一账户的累计充值金额按比例返还钻石：</p>
+        <ul>
+          <li>≤ USD100：<strong>200% Diamond Rebate</strong></li>
+          <li>&gt; USD100：
+            <ul>
+              <li>Amount ≤ USD100 部分：200% Rebate</li>
+              <li>Excess Amount（超出部分）：100% Rebate</li>
+            </ul>
+          </li>
+          <li>All decimal values rounded up（所有小数向上取整）</li>
+        </ul>
+
+        <h3>货币与钻石换算</h3>
+        <p>每 <code>USD0.99</code> 对应 <code>60 钻石</code>。</p>
+
+        <h3>官方示例</h3>
+        <ul>
+          <li>玩家 a 累计 USD49.99 → 3000 × 2 = <strong>6000 钻石</strong></li>
+          <li>玩家 b 累计 USD129.97 → 6000 × 2 + 1800 = <strong>13800 钻石</strong></li>
+        </ul>
+
+        <div class="formula-note">
+          <strong>本计算器采用的公式：</strong>钻石 = <code>ceil(USD) × 60</code>（即 USD 金额先向上取整到整数美元，再乘以 60）。<br>
+          此公式是唯一能同时对齐官方两个示例数值的算法。
+        </div>
+      </div>
+    </details>
+  </div>
+
+</div>
+
+<script>
+  const input = document.getElementById('amount');
+  const errorEl = document.getElementById('error');
+  const totalEl = document.getElementById('totalDiamonds');
+  const p1Usd = document.getElementById('p1Usd');
+  const p1Diamonds = document.getElementById('p1Diamonds');
+  const p1Rebate = document.getElementById('p1Rebate');
+  const p2Usd = document.getElementById('p2Usd');
+  const p2Diamonds = document.getElementById('p2Diamonds');
+  const p2Rebate = document.getElementById('p2Rebate');
+  const sumText = document.getElementById('sumText');
+  const sumTotal = document.getElementById('sumTotal');
+
+  const fmt = n => n.toLocaleString('en-US');
+  const money = n => '$' + n.toFixed(2);
+
+  function calculate(amount) {
+    const part1Usd = Math.min(amount, 100);
+    const part2Usd = Math.max(amount - 100, 0);
+
+    const d1 = Math.ceil(part1Usd) * 60;
+    const d2 = Math.ceil(part2Usd) * 60;
+
+    const r1 = d1 * 2;
+    const r2 = d2 * 1;
+    const total = r1 + r2;
+
+    return { part1Usd, part2Usd, d1, d2, r1, r2, total };
+  }
+
+  function render(amount) {
+    const r = calculate(amount);
+    totalEl.textContent = fmt(r.total);
+
+    p1Usd.textContent = money(r.part1Usd);
+    p1Diamonds.textContent = `ceil(${r.part1Usd.toFixed(2)})×60 = ${fmt(r.d1)}`;
+    p1Rebate.textContent = `${fmt(r.d1)} × 2 = ${fmt(r.r1)}`;
+
+    p2Usd.textContent = money(r.part2Usd);
+    p2Diamonds.textContent = `ceil(${r.part2Usd.toFixed(2)})×60 = ${fmt(r.d2)}`;
+    p2Rebate.textContent = `${fmt(r.d2)} × 1 = ${fmt(r.r2)}`;
+
+    sumText.textContent = `${fmt(r.r1)} + ${fmt(r.r2)} = `;
+    sumTotal.textContent = fmt(r.total);
+  }
+
+  function reset() {
+    totalEl.textContent = '0';
+    [p1Usd, p1Diamonds, p1Rebate, p2Usd, p2Diamonds, p2Rebate].forEach(el => el.textContent = '—');
+    sumText.textContent = '0 + 0 = ';
+    sumTotal.textContent = '0';
+  }
+
+  function update() {
+    const raw = input.value.trim();
+    if (raw === '') {
+      errorEl.textContent = '';
+      input.classList.remove('error');
+      reset();
+      return;
+    }
+    const v = Number(raw);
+    if (!Number.isFinite(v) || v < 0) {
+      errorEl.textContent = '请输入有效的非负金额';
+      input.classList.add('error');
+      reset();
+      return;
+    }
+    errorEl.textContent = '';
+    input.classList.remove('error');
+    render(v);
+  }
+
+  input.addEventListener('input', update);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') update();
+  });
+
+  document.querySelectorAll('.examples button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      input.value = btn.dataset.val;
+      update();
+      input.focus();
+    });
+  });
+</script>
+</body>
+</html>

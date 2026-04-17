@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diamond Rebate Calculator</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4ecf3 100%);
+    min-height: 100vh;
+    padding: 24px 16px;
+    color: #1f2937;
+  }
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .lang-switcher {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    padding: 8px 12px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    z-index: 10;
+  }
+  .lang-switcher label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #475569;
+    cursor: pointer;
+    margin: 0;
+    font-weight: 500;
+  }
+  .lang-switcher input[type="radio"] {
+    margin: 0;
+    cursor: pointer;
+    accent-color: #6366f1;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .card:first-of-type {
+    margin-top: 56px;
+  }
+  h1 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    color: #0f172a;
+  }
+  .subtitle {
+    margin: 0 0 20px;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  label.field-label {
+    display: block;
+    font-size: 13px;
+    color: #475569;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .prefix {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 16px;
+  }
+  input[type="number"] {
+    flex: 1;
+    padding: 12px 14px;
+    font-size: 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+  }
+  input[type="number"]:focus {
+    border-color: #6366f1;
+  }
+  input[type="number"].error {
+    border-color: #ef4444;
+  }
+  .examples {
+    margin-top: 14px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .examples button {
+    background: #eef2ff;
+    color: #4338ca;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .examples button:hover {
+    background: #e0e7ff;
+  }
+  .error-msg {
+    color: #ef4444;
+    font-size: 13px;
+    margin-top: 8px;
+    min-height: 18px;
+  }
+  .result-total {
+    text-align: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: #fff;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  .result-total .label {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-bottom: 6px;
+  }
+  .result-total .value {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .result-total .value .unit {
+    font-size: 18px;
+    opacity: 0.9;
+    margin-left: 6px;
+    font-weight: 500;
+  }
+  .breakdown {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .breakdown-row {
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .breakdown-row:last-child {
+    border-bottom: none;
+    background: #f8fafc;
+    font-weight: 600;
+  }
+  .row-title {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .row-title .rate {
+    color: #4338ca;
+    background: #eef2ff;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    margin-left: 8px;
+  }
+  .row-calc {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.7;
+  }
+  .row-calc .step {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    gap: 10px;
+  }
+  .row-calc .step > span:last-child {
+    text-align: right;
+  }
+  .row-result {
+    margin-top: 8px;
+    font-size: 16px;
+    color: #0f172a;
+  }
+  .row-result strong {
+    color: #4338ca;
+  }
+  details {
+    margin-top: 8px;
+  }
+  details summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: #4338ca;
+    padding: 8px 0;
+    font-size: 14px;
+    user-select: none;
+  }
+  details summary:hover {
+    color: #3730a3;
+  }
+  .rules {
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  .rules h3 {
+    font-size: 14px;
+    color: #0f172a;
+    margin: 12px 0 6px;
+  }
+  .rules code {
+    background: #f1f5f9;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  .formula-note {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #78350f;
+    margin-top: 12px;
+  }
+  @media (max-width: 520px) {
+    .card { padding: 20px; }
+    .card:first-of-type { margin-top: 72px; }
+    h1 { font-size: 20px; }
+    .result-total .value { font-size: 32px; }
+    .lang-switcher { padding: 6px 8px; gap: 6px; }
+    .lang-switcher label { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="lang-switcher" role="radiogroup" aria-label="Language">
+    <label><input type="radio" name="lang" value="en" checked> English</label>
+    <label><input type="radio" name="lang" value="es"> Español</label>
+    <label><input type="radio" name="lang" value="pt"> Português (BR)</label>
+    <label><input type="radio" name="lang" value="fr"> Français (CA)</label>
+  </div>
+
+  <div class="card">
+    <h1 data-i18n="title">Diamond Rebate Calculator</h1>
+    <p class="subtitle" data-i18n="subtitle">The higher your total recharge during the test period, the more rebate diamonds you'll receive after launch.</p>
+
+    <label class="field-label" for="amount" data-i18n="inputLabel">Total Recharge Amount</label>
+    <div class="input-row">
+      <span class="prefix">USD</span>
+      <input type="number" id="amount" placeholder="0.00" step="0.01" min="0" autofocus>
+    </div>
+
+    <div class="examples">
+      <button type="button" data-val="49.99"><span data-i18n="example1">Example 1</span>: $49.99</button>
+      <button type="button" data-val="129.97"><span data-i18n="example2">Example 2</span>: $129.97</button>
+      <button type="button" data-val="100"><span data-i18n="threshold">$100 threshold</span></button>
+      <button type="button" data-val="0" data-i18n="clear">Clear</button>
+    </div>
+
+    <div class="error-msg" id="error"></div>
+  </div>
+
+  <div class="card" id="resultCard">
+    <div class="result-total">
+      <div class="label" data-i18n="totalLabel">Total Rebate Diamonds</div>
+      <div class="value"><span id="totalDiamonds">0</span><span class="unit" data-i18n="diamondsUnit">Diamonds</span></div>
+    </div>
+
+    <div class="breakdown">
+      <div class="breakdown-row">
+        <div class="row-title"><span data-i18n="tier1Title">Tier 1: Amount ≤ $100</span><span class="rate" data-i18n="rate200">200% Rebate</span></div>
+        <div class="row-calc">
+          <div class="step"><span data-i18n="usdAmount">USD Amount</span><span id="p1Usd">—</span></div>
+          <div class="step"><span>ceil(USD) × 60</span><span id="p1Diamonds">—</span></div>
+          <div class="step"><span data-i18n="mult200">× 200% multiplier</span><span id="p1Rebate">—</span></div>
+        </div>
+      </div>
+      <div class="breakdown-row">
+        <div class="row-title"><span data-i18n="tier2Title">Tier 2: Amount > $100</span><span class="rate" data-i18n="rate100">100% Rebate</span></div>
+        <div class="row-calc">
+          <div class="step"><span data-i18n="usdAmount">USD Amount</span><span id="p2Usd">—</span></div>
+          <div class="step"><span>ceil(USD) × 60</span><span id="p2Diamonds">—</span></div>
+          <div class="step"><span data-i18n="mult100">× 100% multiplier</span><span id="p2Rebate">—</span></div>
+        </div>
+      </div>
+      <div class="breakdown-row">
+        <div class="row-title" data-i18n="totalRow">Total</div>
+        <div class="row-result">
+          <span id="sumText">0 + 0 = </span><strong><span id="sumTotal">0</span> <span data-i18n="diamondsWord">Diamonds</span></strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary data-i18n="rulesTitle">View Full Rebate Rules</summary>
+      <div class="rules" id="rulesBody"></div>
+    </details>
+  </div>
+
+</div>
+
+<script>
+  const i18n = {
+    en: {
+      htmlLang: "en",
+      title: "Diamond Rebate Calculator",
+      subtitle: "The higher your total recharge during the test period, the more rebate diamonds you'll receive after launch.",
+      inputLabel: "Total Recharge Amount",
+      example1: "Example 1",
+      example2: "Example 2",
+      threshold: "$100 threshold",
+      clear: "Clear",
+      totalLabel: "Total Rebate Diamonds",
+      diamondsUnit: "Diamonds",
+      diamondsWord: "Diamonds",
+      tier1Title: "Tier 1: Amount ≤ $100",
+      tier2Title: "Tier 2: Amount > $100",
+      rate200: "200% Rebate",
+      rate100: "100% Rebate",
+      usdAmount: "USD Amount",
+      mult200: "× 200% multiplier",
+      mult100: "× 100% multiplier",
+      totalRow: "Total",
+      rulesTitle: "View Full Rebate Rules",
+      error: "Please enter a valid non-negative amount",
+      locale: "en-US",
+      rules: `
+        <h3>Counted Purchases</h3>
+        <p>During the test period, player purchases of <strong>[Any Diamond Tier]</strong>, <strong>[Battle Pass]</strong> and <strong>[Gift Packs]</strong> will be counted toward the <strong>Total Recharge Amount</strong>.</p>
+        <h3>Rebate Tiers</h3>
+        <p>After the official launch, diamonds will be rebated based on the same account's total recharge during the test period:</p>
+        <ul>
+          <li>≤ USD 100: <strong>200% Diamond Rebate</strong></li>
+          <li>&gt; USD 100:
+            <ul>
+              <li>Amount ≤ USD 100: 200% Rebate</li>
+              <li>Excess amount: 100% Rebate</li>
+            </ul>
+          </li>
+          <li>All decimal values rounded up.</li>
+        </ul>
+        <h3>Currency ↔ Diamond Exchange</h3>
+        <p>Every <code>USD 0.99</code> = <code>60 Diamonds</code>.</p>
+        <h3>Official Examples</h3>
+        <ul>
+          <li>Player A recharges USD 49.99 → 3000 × 2 = <strong>6000 Diamonds</strong></li>
+          <li>Player B recharges USD 129.97 → 6000 × 2 + 1800 = <strong>13800 Diamonds</strong></li>
+        </ul>
+        <div class="formula-note">
+          <strong>Formula used by this calculator:</strong> Diamonds = <code>ceil(USD) × 60</code> (USD rounded up to the next whole dollar, then multiplied by 60).<br>
+          This is the only formula that aligns with both official examples.
+        </div>
+      `
+    },
+    es: {
+      htmlLang: "es",
+      title: "Calculadora de Reembolso de Diamantes",
+      subtitle: "Cuanto mayor sea tu recarga total durante el período de prueba, más diamantes de reembolso recibirás al lanzamiento.",
+      inputLabel: "Monto total recargado",
+      example1: "Ejemplo 1",
+      example2: "Ejemplo 2",
+      threshold: "Umbral de $100",
+      clear: "Borrar",
+      totalLabel: "Total de diamantes de reembolso",
+      diamondsUnit: "Diamantes",
+      diamondsWord: "Diamantes",
+      tier1Title: "Nivel 1: Monto ≤ $100",
+      tier2Title: "Nivel 2: Monto > $100",
+      rate200: "Reembolso 200 %",
+      rate100: "Reembolso 100 %",
+      usdAmount: "Monto en USD",
+      mult200: "× multiplicador 200 %",
+      mult100: "× multiplicador 100 %",
+      totalRow: "Total",
+      rulesTitle: "Ver reglas completas de reembolso",
+      error: "Por favor, introduce un monto válido no negativo",
+      locale: "es-ES",
+      rules: `
+        <h3>Compras contabilizadas</h3>
+        <p>Durante el período de prueba, las compras del jugador de <strong>[cualquier nivel de diamantes]</strong>, <strong>[pase de batalla]</strong> y <strong>[paquetes de regalo]</strong> se contabilizarán en el <strong>Monto total recargado</strong>.</p>
+        <h3>Niveles de reembolso</h3>
+        <p>Tras el lanzamiento oficial, los diamantes se reembolsarán según la recarga total de la misma cuenta durante el período de prueba:</p>
+        <ul>
+          <li>≤ USD 100: <strong>Reembolso de 200 % en diamantes</strong></li>
+          <li>&gt; USD 100:
+            <ul>
+              <li>Monto ≤ USD 100: Reembolso del 200 %</li>
+              <li>Monto excedente: Reembolso del 100 %</li>
+            </ul>
+          </li>
+          <li>Todos los valores decimales se redondean hacia arriba.</li>
+        </ul>
+        <h3>Conversión moneda ↔ diamantes</h3>
+        <p>Cada <code>USD 0,99</code> = <code>60 diamantes</code>.</p>
+        <h3>Ejemplos oficiales</h3>
+        <ul>
+          <li>El jugador A recarga USD 49,99 → 3000 × 2 = <strong>6000 diamantes</strong></li>
+          <li>El jugador B recarga USD 129,97 → 6000 × 2 + 1800 = <strong>13 800 diamantes</strong></li>
+        </ul>
+        <div class="formula-note">
+          <strong>Fórmula utilizada por esta calculadora:</strong> Diamantes = <code>ceil(USD) × 60</code> (USD redondeado hacia arriba al siguiente dólar entero, luego multiplicado por 60).<br>
+          Es la única fórmula que coincide con ambos ejemplos oficiales.
+        </div>
+      `
+    },
+    pt: {
+      htmlLang: "pt-BR",
+      title: "Calculadora de Reembolso de Diamantes",
+      subtitle: "Quanto maior for sua recarga total durante o período de teste, mais diamantes de reembolso você receberá no lançamento.",
+      inputLabel: "Valor total recarregado",
+      example1: "Exemplo 1",
+      example2: "Exemplo 2",
+      threshold: "Limite de $100",
+      clear: "Limpar",
+      totalLabel: "Total de diamantes de reembolso",
+      diamondsUnit: "Diamantes",
+      diamondsWord: "Diamantes",
+      tier1Title: "Faixa 1: Valor ≤ $100",
+      tier2Title: "Faixa 2: Valor > $100",
+      rate200: "Reembolso 200%",
+      rate100: "Reembolso 100%",
+      usdAmount: "Valor em USD",
+      mult200: "× multiplicador 200%",
+      mult100: "× multiplicador 100%",
+      totalRow: "Total",
+      rulesTitle: "Ver regras completas de reembolso",
+      error: "Por favor, insira um valor válido não negativo",
+      locale: "pt-BR",
+      rules: `
+        <h3>Compras contabilizadas</h3>
+        <p>Durante o período de teste, as compras do jogador de <strong>[qualquer faixa de diamantes]</strong>, <strong>[passe de batalha]</strong> e <strong>[pacotes de presente]</strong> serão contabilizadas no <strong>Valor total recarregado</strong>.</p>
+        <h3>Faixas de reembolso</h3>
+        <p>Após o lançamento oficial, os diamantes serão reembolsados com base na recarga total da mesma conta durante o período de teste:</p>
+        <ul>
+          <li>≤ USD 100: <strong>Reembolso de 200% em diamantes</strong></li>
+          <li>&gt; USD 100:
+            <ul>
+              <li>Valor ≤ USD 100: Reembolso de 200%</li>
+              <li>Valor excedente: Reembolso de 100%</li>
+            </ul>
+          </li>
+          <li>Todos os valores decimais são arredondados para cima.</li>
+        </ul>
+        <h3>Conversão moeda ↔ diamantes</h3>
+        <p>A cada <code>USD 0,99</code> = <code>60 diamantes</code>.</p>
+        <h3>Exemplos oficiais</h3>
+        <ul>
+          <li>Jogador A recarrega USD 49,99 → 3000 × 2 = <strong>6000 diamantes</strong></li>
+          <li>Jogador B recarrega USD 129,97 → 6000 × 2 + 1800 = <strong>13.800 diamantes</strong></li>
+        </ul>
+        <div class="formula-note">
+          <strong>Fórmula usada por esta calculadora:</strong> Diamantes = <code>ceil(USD) × 60</code> (USD arredondado para cima ao próximo dólar inteiro e, em seguida, multiplicado por 60).<br>
+          Esta é a única fórmula que corresponde aos dois exemplos oficiais.
+        </div>
+      `
+    },
+    fr: {
+      htmlLang: "fr-CA",
+      title: "Calculatrice de remise en diamants",
+      subtitle: "Plus votre rechargement total pendant la période d'essai est élevé, plus vous recevrez de diamants en remise au lancement.",
+      inputLabel: "Montant total rechargé",
+      example1: "Exemple 1",
+      example2: "Exemple 2",
+      threshold: "Seuil de 100 $",
+      clear: "Effacer",
+      totalLabel: "Total des diamants en remise",
+      diamondsUnit: "Diamants",
+      diamondsWord: "Diamants",
+      tier1Title: "Palier 1 : Montant ≤ 100 $",
+      tier2Title: "Palier 2 : Montant > 100 $",
+      rate200: "Remise de 200 %",
+      rate100: "Remise de 100 %",
+      usdAmount: "Montant en USD",
+      mult200: "× multiplicateur 200 %",
+      mult100: "× multiplicateur 100 %",
+      totalRow: "Total",
+      rulesTitle: "Voir les règles complètes de la remise",
+      error: "Veuillez saisir un montant valide non négatif",
+      locale: "fr-CA",
+      rules: `
+        <h3>Achats comptabilisés</h3>
+        <p>Pendant la période d'essai, les achats du joueur portant sur <strong>[tout palier de diamants]</strong>, <strong>[passe de combat]</strong> et <strong>[lots cadeaux]</strong> seront comptabilisés dans le <strong>Montant total rechargé</strong>.</p>
+        <h3>Paliers de remise</h3>
+        <p>Après le lancement officiel, des diamants seront remis en fonction du rechargement total du même compte pendant la période d'essai :</p>
+        <ul>
+          <li>≤ 100 USD : <strong>Remise de 200 % en diamants</strong></li>
+          <li>&gt; 100 USD :
+            <ul>
+              <li>Montant ≤ 100 USD : remise de 200 %</li>
+              <li>Montant excédentaire : remise de 100 %</li>
+            </ul>
+          </li>
+          <li>Toutes les valeurs décimales sont arrondies au supérieur.</li>
+        </ul>
+        <h3>Conversion monnaie ↔ diamants</h3>
+        <p>Chaque <code>0,99 USD</code> = <code>60 diamants</code>.</p>
+        <h3>Exemples officiels</h3>
+        <ul>
+          <li>Le joueur A recharge 49,99 USD → 3000 × 2 = <strong>6000 diamants</strong></li>
+          <li>Le joueur B recharge 129,97 USD → 6000 × 2 + 1800 = <strong>13 800 diamants</strong></li>
+        </ul>
+        <div class="formula-note">
+          <strong>Formule utilisée par cette calculatrice :</strong> Diamants = <code>ceil(USD) × 60</code> (USD arrondi au dollar entier supérieur, puis multiplié par 60).<br>
+          C'est la seule formule qui correspond aux deux exemples officiels.
+        </div>
+      `
+    }
+  };
+
+  let currentLang = "en";
+
+  const input = document.getElementById('amount');
+  const errorEl = document.getElementById('error');
+  const totalEl = document.getElementById('totalDiamonds');
+  const p1Usd = document.getElementById('p1Usd');
+  const p1Diamonds = document.getElementById('p1Diamonds');
+  const p1Rebate = document.getElementById('p1Rebate');
+  const p2Usd = document.getElementById('p2Usd');
+  const p2Diamonds = document.getElementById('p2Diamonds');
+  const p2Rebate = document.getElementById('p2Rebate');
+  const sumText = document.getElementById('sumText');
+  const sumTotal = document.getElementById('sumTotal');
+  const rulesBody = document.getElementById('rulesBody');
+
+  function fmtInt(n) {
+    return new Intl.NumberFormat(i18n[currentLang].locale).format(n);
+  }
+  function fmtMoney(n) {
+    return new Intl.NumberFormat(i18n[currentLang].locale, {
+      style: "currency", currency: "USD", currencyDisplay: "symbol"
+    }).format(n);
+  }
+  function fmtUsd2(n) {
+    return new Intl.NumberFormat(i18n[currentLang].locale, {
+      minimumFractionDigits: 2, maximumFractionDigits: 2
+    }).format(n);
+  }
+
+  function calculate(amount) {
+    const part1Usd = Math.min(amount, 100);
+    const part2Usd = Math.max(amount - 100, 0);
+    const d1 = Math.ceil(part1Usd) * 60;
+    const d2 = Math.ceil(part2Usd) * 60;
+    const r1 = d1 * 2;
+    const r2 = d2 * 1;
+    const total = r1 + r2;
+    return { part1Usd, part2Usd, d1, d2, r1, r2, total };
+  }
+
+  function render(amount) {
+    const r = calculate(amount);
+    totalEl.textContent = fmtInt(r.total);
+    p1Usd.textContent = fmtMoney(r.part1Usd);
+    p1Diamonds.textContent = `ceil(${fmtUsd2(r.part1Usd)})×60 = ${fmtInt(r.d1)}`;
+    p1Rebate.textContent = `${fmtInt(r.d1)} × 2 = ${fmtInt(r.r1)}`;
+    p2Usd.textContent = fmtMoney(r.part2Usd);
+    p2Diamonds.textContent = `ceil(${fmtUsd2(r.part2Usd)})×60 = ${fmtInt(r.d2)}`;
+    p2Rebate.textContent = `${fmtInt(r.d2)} × 1 = ${fmtInt(r.r2)}`;
+    sumText.textContent = `${fmtInt(r.r1)} + ${fmtInt(r.r2)} = `;
+    sumTotal.textContent = fmtInt(r.total);
+  }
+
+  function reset() {
+    totalEl.textContent = fmtInt(0);
+    [p1Usd, p1Diamonds, p1Rebate, p2Usd, p2Diamonds, p2Rebate].forEach(el => el.textContent = '—');
+    sumText.textContent = `${fmtInt(0)} + ${fmtInt(0)} = `;
+    sumTotal.textContent = fmtInt(0);
+  }
+
+  function update() {
+    const raw = input.value.trim();
+    if (raw === '') {
+      errorEl.textContent = '';
+      input.classList.remove('error');
+      reset();
+      return;
+    }
+    const v = Number(raw);
+    if (!Number.isFinite(v) || v < 0) {
+      errorEl.textContent = i18n[currentLang].error;
+      input.classList.add('error');
+      reset();
+      return;
+    }
+    errorEl.textContent = '';
+    input.classList.remove('error');
+    render(v);
+  }
+
+  function applyLang(lang) {
+    currentLang = lang;
+    const t = i18n[lang];
+    document.documentElement.lang = t.htmlLang;
+    document.title = t.title;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+    rulesBody.innerHTML = t.rules;
+    update();
+  }
+
+  document.querySelectorAll('input[name="lang"]').forEach(r => {
+    r.addEventListener('change', e => {
+      if (e.target.checked) applyLang(e.target.value);
+    });
+  });
+
+  input.addEventListener('input', update);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') update();
+  });
+
+  document.querySelectorAll('.examples button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      input.value = btn.dataset.val;
+      update();
+      input.focus();
+    });
+  });
+
+  applyLang('en');
+</script>
+</body>
+</html>
